@@ -1,5 +1,5 @@
 version: '0.2'
-ignorePaths: ['/*/**/pokemon.json']
+ignorePaths: ['/*/**/pokemon-simplified.json']
 dictionaryDefinitions: []
 dictionaries: []
 words: []
