@@ -8,4 +8,5 @@ export interface Pokemon {
     special_attack: number;
     special_defense: number;
     speed: number;
+    power?: number;
 }
