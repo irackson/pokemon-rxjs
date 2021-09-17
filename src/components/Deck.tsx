@@ -1,12 +1,13 @@
 import { useObservableState } from 'observable-hooks';
 import { FC } from 'react';
-import { deck$ } from '../store';
+import { usePokemon } from '../store';
 
 interface DeckProps {
     title: string;
 }
 
 const Deck: FC<DeckProps> = ({ title }) => {
+    const { deck$ } = usePokemon();
     const deck = useObservableState(deck$, []);
     return (
         <div>

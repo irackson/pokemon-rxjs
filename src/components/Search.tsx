@@ -1,33 +1,55 @@
-import { FC, useEffect, useMemo, useState } from 'react';
-import { Pokemon } from '../shared-types';
-import { pokemon$, selected$ } from '../store';
+import { useObservableState } from 'observable-hooks';
+import { FC, useMemo, useState } from 'react';
+import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
+import { usePokemon } from '../store';
 
 interface SearchProps {
     placeholder: string;
 }
 
 const Search: FC<SearchProps> = ({ placeholder }) => {
-    const [search, setSearch] = useState('');
-    const [pokemon, setPokemon] = useState<Pokemon[]>([]);
+    const { pokemon$, selected$ } = usePokemon();
 
-    const filteredPokemon = useMemo(
+    const search$ = useMemo(() => new BehaviorSubject(''), []);
+
+    // const pokemon = useObservableState(pokemon$, []);
+
+    const [filteredPokemon] = useObservableState(
         () =>
-            pokemon.filter(({ name }) =>
-                name.toLowerCase().includes(search.toLowerCase())
+            pokemon$.pipe(
+                combineLatestWith(search$),
+                map(([pokemon, search]) =>
+                    pokemon.filter((p) =>
+                        p.name.toLowerCase().includes(search.toLowerCase())
+                    )
+                )
             ),
-        [pokemon, search]
+        []
     );
-    useEffect(() => {
-        const sub = pokemon$.subscribe(setPokemon);
-        return () => sub.unsubscribe();
-    }, []);
+
+    // const [search, setSearch] = useState('');
+    // const [pokemon, setPokemon] = useState<Pokemon[]>([]);
+
+    // const filteredPokemon = useMemo(
+    //     () =>
+    //         pokemon.filter(({ name }) =>
+    //             name.toLowerCase().includes(search$.value.toLowerCase())
+    //         ),
+    //     [pokemon, search]
+    // );
+    // useEffect(() => {
+    //     const sub = pokemon$.subscribe(setPokemon);
+    //     return () => sub.unsubscribe();
+    // }, []);
 
     return (
         <div>
             <input
                 type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                // value={search}
+                value={search$.value}
+                // onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => search$.next(e.target.value)}
                 placeholder={placeholder}
             />
             <div

@@ -1,3 +1,4 @@
+import { createContext, FC, useContext } from 'react';
 import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { Pokemon } from './shared-types';
 
@@ -18,9 +19,9 @@ const pokemonWithPower$ = rawPokemon$.pipe(
     )
 );
 
-export const selected$ = new BehaviorSubject<number[]>([]);
+const selected$ = new BehaviorSubject<number[]>([]);
 
-export const pokemon$ = pokemonWithPower$.pipe(
+const pokemon$ = pokemonWithPower$.pipe(
     combineLatestWith(selected$),
     map(([pokemon, selected]) =>
         pokemon.map((p) => ({
@@ -30,10 +31,24 @@ export const pokemon$ = pokemonWithPower$.pipe(
     )
 );
 
-export const deck$ = pokemon$.pipe(
+const deck$ = pokemon$.pipe(
     map((pokemon) => pokemon.filter((p) => p.selected))
 );
 
 fetch('/pokemon-simplified.json')
     .then((res) => res.json())
     .then((data) => rawPokemon$.next(data));
+
+const PokemonContext = createContext({
+    pokemon$,
+    selected$,
+    deck$,
+});
+
+export const PokemonProvider: FC = ({ children }) => (
+    <PokemonContext.Provider value={{ pokemon$, selected$, deck$ }}>
+        {children}
+    </PokemonContext.Provider>
+);
+
+export const usePokemon = () => useContext(PokemonContext);
