@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Pokemon } from '../shared-types';
-import { pokemonWithPower$ } from '../store';
+import { pokemon$, selected$ } from '../store';
 
 interface SearchProps {
     placeholder: string;
@@ -18,7 +18,7 @@ const Search: FC<SearchProps> = ({ placeholder }) => {
         [pokemon, search]
     );
     useEffect(() => {
-        const sub = pokemonWithPower$.subscribe(setPokemon);
+        const sub = pokemon$.subscribe(setPokemon);
         return () => sub.unsubscribe();
     }, []);
 
@@ -34,11 +34,27 @@ const Search: FC<SearchProps> = ({ placeholder }) => {
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '1rem',
+                    rowGap: '1rem',
                 }}
             >
                 {filteredPokemon.map((p) => (
                     <div key={p.name}>
+                        <input
+                            type="checkbox"
+                            // checked={selected$.value.includes(p.id)}
+                            checked={p.selected}
+                            onChange={() => {
+                                if (selected$.value.includes(p.id)) {
+                                    selected$.next(
+                                        selected$.value.filter(
+                                            (id) => id !== p.id
+                                        )
+                                    );
+                                } else {
+                                    selected$.next([...selected$.value, p.id]);
+                                }
+                            }}
+                        />
                         <strong>{p.name}</strong> - {p.power}
                     </div>
                 ))}

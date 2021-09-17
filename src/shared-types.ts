@@ -9,4 +9,5 @@ export interface Pokemon {
     special_defense: number;
     speed: number;
     power?: number;
+    selected?: boolean;
 }
